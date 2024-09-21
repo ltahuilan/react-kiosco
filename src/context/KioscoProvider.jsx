@@ -55,7 +55,7 @@ const KioscoProvider = ({ children }) => {
         if(pedido.some(pedidoState => pedidoState.id === id)) {
             const pedidoActualizado = pedido.filter(producto => producto.id !== id);
             setPedido(pedidoActualizado)
-            toast.warn('Producto eliminado correctamente', {autoClose: 1500, theme: "dark"})
+            toast.success('Producto eliminado correctamente', {autoClose: 1500, theme: "dark"})
         }
     }
 
