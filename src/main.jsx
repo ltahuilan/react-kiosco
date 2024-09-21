@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { KioscoProvider } from './context/KioscoProvider';
+import { AppProvider } from './context/AppProvider';
 import router from './router';
 import './index.css';
 

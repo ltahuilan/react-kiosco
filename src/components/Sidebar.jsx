@@ -38,7 +38,7 @@ return (
 			<div className='p-4'>
 				<button
 					type='click'
-					className='w-full mt-4 p-4 bg-red-500 hover:bg-red-700 text-white font-bold transition-colors truncate'
+					className='w-full mt-4 p-4 bg-red-500 hover:bg-red-700 text-white font-bold uppercase transition-colors truncate'
 				>
 					Cancelar Orden
 				</button>

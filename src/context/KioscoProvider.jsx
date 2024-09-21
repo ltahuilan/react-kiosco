@@ -1,4 +1,5 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import { categorias as categoriasDB} from '../data/categorias';
 
 const KioscoContext = createContext();
@@ -6,18 +7,19 @@ const KioscoContext = createContext();
 const KioscoProvider = ({ children }) => {
     
     //nota: 1, 2
-    const [ categorias, setCategorias ] = useState(categoriasDB);
+    const [ categorias ] = useState(categoriasDB);
     const [ categoriaActual, setCategoriaActual ] = useState(categorias[0]);
     const [ modal, setModal ] = useState(false);
-    const [ producto, setProducto ] = useState({});
+    const [ producto, setProducto ] = useState({}); //inicia con un obj vacío
+    const [ pedido, setPedido ] = useState([]); //inicia con un arreglo vacio
+    const [ total, setTotal ] = useState(0);
 
 
-    const handleClickCategoria = (id) => {        
+    const handleClickCategoria = id => {        
         // filtrar la categoria seleccionada
         const categoria = categorias.filter( categoria => categoria.id === id)[0]; //[0] accede al primer elemento para asignar el obj
-        
-        //modificar categoriaActual
-        setCategoriaActual(categoria);
+ 
+        setCategoriaActual(categoria);//modificar categoriaActual
     }
 
     const handleClickModal = () => {
@@ -28,6 +30,45 @@ const KioscoProvider = ({ children }) => {
         setProducto(producto);
     }
 
+    const handleAgregarAlPedido = ({categoria_id, ...producto}) => {
+        //si existe modificar el producto, .map devuelve un array nuevo con el elemento modificado
+        if(pedido.some(pedidoState => pedidoState.id === producto.id )) {
+            const pedidoActualizado = pedido.map(pedidoState => pedidoState.id === producto.id ? producto : pedidoState)
+            setPedido(pedidoActualizado)
+            toast.success('Producto actualizado correctamente', {autoClose: 1500, theme: "dark"})
+        }else {
+            //si no existe agregar al pedido
+            setPedido( [...pedido, producto ] )
+            toast.success('Producto agregado correctamente', {autoClose: 1500, theme: "dark"})
+        }
+    }
+
+    const handleEditarProducto = id => {
+        if(pedido.some(pedidoState => pedidoState.id === id)) {
+            const pedidoEditado = pedido.filter(producto => producto.id === id)[0]
+            handleProductoModal(pedidoEditado);
+            handleClickModal();
+        }
+    }
+
+    const handleEliminarProducto = (id) => {
+        if(pedido.some(pedidoState => pedidoState.id === id)) {
+            const pedidoActualizado = pedido.filter(producto => producto.id !== id);
+            setPedido(pedidoActualizado)
+            toast.warn('Producto eliminado correctamente', {autoClose: 1500, theme: "dark"})
+        }
+    }
+
+    const pedidoIsEmpty = () => {
+        return pedido.length === 0;
+    }
+
+    useEffect( () => {
+        if(pedido.length !== 0) {
+            const totalAcumulado = pedido.reduce( (total, producto) => total + (producto.cantidad * producto.precio), 0 )
+            setTotal(totalAcumulado)
+        }
+    }, [pedido])
 
     return (
         <KioscoContext.Provider
@@ -38,7 +79,13 @@ const KioscoProvider = ({ children }) => {
                 modal,
                 handleClickModal,
                 producto,
-                handleProductoModal
+                handleProductoModal,
+                pedido,
+                handleAgregarAlPedido,
+                handleEditarProducto,
+                handleEliminarProducto,
+                total,
+                pedidoIsEmpty
             }}
         >{ children }</KioscoContext.Provider>
     );
@@ -49,7 +96,6 @@ export {
     KioscoProvider
 };
 
-//exprot default
 export default KioscoContext;
 
 

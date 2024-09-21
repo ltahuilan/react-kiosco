@@ -1,6 +1,8 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Modal from 'react-modal';
+import {ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from '../components/Sidebar';
 import Resumen from '../components/Resumen';
 import useKiosco from '../hooks/useKiosco';
@@ -14,6 +16,7 @@ const customStyles = {
 		bottom: "auto",
 		marginRight: "-50%",
 		transform: "translate(-50%, -50%)",
+		// backgroundColor: "#cbd5e1"
 	},
 }
 
@@ -38,10 +41,11 @@ export default function Layout() {
 				isOpen={modal}
 				style={customStyles}
 			>
-				<ProductoModal>
+				<ProductoModal />
 
-				</ProductoModal>
 			</Modal>
+
+			<ToastContainer />
 		</>
 	)
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-import Productos from '../components/Productos'
+import Producto from '../components/Producto'
 import { productos as data} from '../data/productos'
 import useKiosco from '../hooks/useKiosco'
 
@@ -17,7 +17,7 @@ export default function Inicio() {
 			<p className='text-xl dark:text-slate-200 my-3'>Elige y personaliza tu pedido</p>
 			<div className='grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'>
 				{productos.map( producto => (
-					<Productos 
+					<Producto
 						//props
 						key={producto.imagen}
 						producto={producto}
