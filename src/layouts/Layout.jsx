@@ -1,12 +1,14 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import Modal from 'react-modal';
 import {ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from '../components/Sidebar';
 import Resumen from '../components/Resumen';
-import useKiosco from '../hooks/useKiosco';
 import ProductoModal from '../components/ProductoModal';
+import useKiosco from '../hooks/useKiosco';
+import { useAuth } from '../hooks/useAuth';
+import { useEffect } from 'react';
 
 const customStyles = {
 	content: {
@@ -25,7 +27,11 @@ Modal.setAppElement('#root');
 export default function Layout() {
 
 	const { modal, handleClickModal } = useKiosco();
+	const { user, error } = useAuth({middleware: 'auth'});
+	const navigate = useNavigate();
 
+	// console.log(user);
+	// console.log(error);
 
 	return (
 		<>
@@ -48,4 +54,5 @@ export default function Layout() {
 			<ToastContainer />
 		</>
 	)
+
 }

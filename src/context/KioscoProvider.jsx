@@ -1,18 +1,37 @@
 import { createContext, useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { categorias as categoriasDB} from '../data/categorias';
+// import { categorias as categoriasDB} from '../data/categorias'; //desde un array 
+import axiosClient from "../config/axios";
 
+// Definir un nuevo context
 const KioscoContext = createContext();
 
+// Las funciones y variables registradas en KioscoProvider esta disponibles en toda la app
 const KioscoProvider = ({ children }) => {
     
     //nota: 1, 2
-    const [ categorias ] = useState(categoriasDB);
-    const [ categoriaActual, setCategoriaActual ] = useState(categorias[0]);
+    const [ categorias, setCategorias ] = useState([]); //inicia las categorias con un arreglo vacío
+    const [ categoriaActual, setCategoriaActual ] = useState({});
     const [ modal, setModal ] = useState(false);
     const [ producto, setProducto ] = useState({}); //inicia con un obj vacío
     const [ pedido, setPedido ] = useState([]); //inicia con un arreglo vacio
     const [ total, setTotal ] = useState(0);
+
+    //obtener las categorias desde un API utilizando axios
+    const getCategorias = async () => {
+        //axiosClient definido en assets/config/axios.js
+        try {
+            const {data} = await axiosClient('/api/categorias')
+            setCategorias(data.data)
+            setCategoriaActual(data.data[0])
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect( () => {
+        getCategorias()
+    }, []);
 
 
     const handleClickCategoria = id => {        
@@ -39,7 +58,7 @@ const KioscoProvider = ({ children }) => {
         }else {
             //si no existe agregar al pedido
             setPedido( [...pedido, producto ] )
-            toast.success('Producto agregado correctamente', {autoClose: 1500, theme: "dark"})
+            toast.success('Producto agregado correctamente', {autoClose: 1000, theme: "dark"})
         }
     }
 
@@ -59,6 +78,50 @@ const KioscoProvider = ({ children }) => {
         }
     }
 
+    const handleFinalizarPedido = async (logout) => {
+
+        //recuperar el token
+        const token = localStorage.getItem('AUTH_TOKEN');
+
+        try {
+            const {data} = await axiosClient.post('/api/pedidos', 
+                {
+                    productos: pedido.map(producto => {
+                        return {
+                            id: producto.id,
+                            cantidad: producto.cantidad
+                        }
+                    }),
+                    total
+                },
+                {
+                    headers: {
+                        Authorization : `Bearer ${token}`
+                    }                    
+                }
+            );
+            
+            //mostrar notificacion
+            toast.success(data.message, {autoClose: 1500, theme: 'dark'});
+            
+            //vaciar el pedido y reset al total
+            setPedido([]);
+            setTotal(0);
+            
+            //mostrar notificacion
+            toast.warn('La sesión ha finalizado...', {autoClose: 3000, theme: 'dark'});
+            
+            setTimeout(() => {
+                //eliminar el token y cerrar sesión
+                localStorage.removeItem('AUTH_TOKEN');
+                logout();
+            }, 3000);
+
+        } catch (error) {
+            console.log(error?.response?.data?.message)
+        }
+    }
+
     const pedidoIsEmpty = () => {
         return pedido.length === 0;
     }
@@ -70,6 +133,10 @@ const KioscoProvider = ({ children }) => {
         }
     }, [pedido])
 
+    /**
+     * Retorna el KioscoContext con las variables y funciones que requieran estar disponibles
+     * en cualquier componente por medio de un hook, en este caso definido como useKiosco
+     */
     return (
         <KioscoContext.Provider
             value={{
@@ -85,7 +152,8 @@ const KioscoProvider = ({ children }) => {
                 handleEditarProducto,
                 handleEliminarProducto,
                 total,
-                pedidoIsEmpty
+                pedidoIsEmpty,
+                handleFinalizarPedido
             }}
         >{ children }</KioscoContext.Provider>
     );

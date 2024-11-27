@@ -1,7 +1,43 @@
 import React from 'react';
+import { createRef, useState} from 'react';
 import { Link } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth';
+import ErroresFormulario from '../components/ErroresFormulario';
+import Spinner from '../components/Spinner';
 
 export default function Register() {
+
+	//createRef() permite crear un objeto de referencia a un elemento del DOM, en este caso un input
+	const nameRef = createRef();
+	const emailRef = createRef();
+	const passwordRef = createRef();
+	const passwordConfirmationRef = createRef();
+
+	//state para manejar los errores
+	const [errors, setErrors] = useState([]);
+	const [spinnerRegister, setSpinnerRegister] = useState(false);
+
+	//hook
+	const {register} = useAuth({
+		middleware: 'guest',
+		url: '/'
+	});
+
+	const handleSubmit = async event => {
+		
+		event.preventDefault();
+
+		//se accede al value de un input utilizando current.value
+		const dataForm = {
+			name: nameRef.current.value,
+			email: emailRef.current.value,
+			password: passwordRef.current.value,
+			password_confirmation: passwordConfirmationRef.current.value
+		}
+
+		register(dataForm, setErrors, setSpinnerRegister);
+	}
+
 	return (
 		<>
 			<h2 className="text-center text-4xl text-slate-900 dark:text-slate-100 font-bold">
@@ -11,8 +47,16 @@ export default function Register() {
 				Ingresa tus datos para crear tu cuenta
 			</p>
 
+
 			<div className="bg-white dark:bg-slate-600 p-6 mt-4 rounded-lg shadow-lg">
-				<form className='space-y-4'>
+				
+				{ errors ? errors.map((error, i) => <ErroresFormulario key={i}>{error}</ErroresFormulario>) : null }
+
+				<form
+					className='space-y-4'
+					onSubmit={handleSubmit}
+					noValidate
+				>
 					<div>
 						<label
 							htmlFor="name"
@@ -23,6 +67,7 @@ export default function Register() {
 							name="name"
 							className="w-full mt-2 p-3 bg-slate-100 focus:outline-4 focus:outline-indigo-300 rounded-lg"
 							placeholder="Your name"
+							ref={nameRef}
 						/>
 					</div>
 
@@ -36,6 +81,7 @@ export default function Register() {
 							name="email"
 							className="w-full mt-2 p-3 bg-slate-100 focus:outline-4 focus:outline-indigo-300 rounded-lg"
 							placeholder="Your email"
+							ref={emailRef}
 						/>
 					</div>
 
@@ -49,6 +95,7 @@ export default function Register() {
 							name="password"
 							className="w-full mt-2 p-3 bg-slate-100 focus:outline-4 focus:outline-indigo-300 rounded-lg"
 							placeholder="Your password"
+							ref={passwordRef}
 						/>
 					</div>
 
@@ -62,14 +109,17 @@ export default function Register() {
 							name="password_confirmation"
 							className="w-full mt-2 p-3 bg-slate-100 focus:outline-4 focus:outline-indigo-300 rounded-lg"
 							placeholder="Confirm password"
+							ref={passwordConfirmationRef}
 						/>
 					</div>
 
 					<input
 						type="submit"
 						value="Create Account"
-						className="w-full p-3 mt-10 bg-indigo-600 hover:bg-indigo-800 border-none focus:outline-4 focus:outline-indigo-600 text-white font-bold rounded-lg"
+						className="w-full p-3 bg-indigo-600 hover:bg-indigo-800 border-none focus:outline-4 focus:outline-indigo-600 text-white font-bold rounded-lg"
 						/>
+					
+				{spinnerRegister ? <Spinner message={'Creando cuenta...'}/> : ''}
 				</form>
 			</div>
 

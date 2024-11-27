@@ -1,13 +1,20 @@
 import React from 'react';
 import useKiosco from '../hooks/useKiosco';
+import { useAuth } from '../hooks/useAuth';
 import ResumenPedido from './ResumenPedido';
 import { formatoDinero } from '../helpers';
 
 export default function Resumen() {
 
-	const { pedido, total, pedidoIsEmpty } = useKiosco();
+	const { pedido, total, pedidoIsEmpty, handleFinalizarPedido } = useKiosco();
+	const { logout } = useAuth({});
 
+	const handleSubmit = (event) => {
+		event.preventDefault();
 
+		//en KioscoProvider
+		handleFinalizarPedido(logout);
+	}
 return (
 	<aside className='w-72 h-screen overflow-y-scroll p-5'>
 		<h1 className='text-3xl text-center dark:text-slate-200 font-black'>
@@ -43,6 +50,7 @@ return (
 					type='submit'
 					className={`${pedidoIsEmpty() ? 'bg-indigo-200 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-800 cursor-pointer'} w-full text-white font-bold uppercase p-3 transition-colors`}
 					disabled={pedidoIsEmpty()}
+					onClick={handleSubmit}
 				>
 					Finalizar Pedido
 				</button>

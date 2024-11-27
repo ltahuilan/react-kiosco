@@ -1,11 +1,15 @@
 import React from 'react';
 import Categoria from './Categoria';
 import useKiosco from '../hooks/useKiosco';
+import { useAuth } from '../hooks/useAuth';
 
 
 export default function Sidebar() {
 	
 	const { categorias } = useKiosco();
+	const { logout, user} = useAuth( {middleware: 'auth'} );
+
+	// console.log(user?.name)
 
 return (
 	<aside className='md:w-72 p-4'>
@@ -17,10 +21,11 @@ return (
 			/>
 		</div>
 
+		<p className='my-10 text-center text-xl dark:text-slate-200'>
+			Hola: <span className='font-bold'>{user?.name}</span>
+		</p>
+
 		<div className='mt-10'>
-			{/* {categorias.map(categoria => {
-				return (<p>Hola</p>)
-			})} */}
 
 			{categorias.map( categoria => (
 				<Categoria
@@ -35,15 +40,16 @@ return (
 			) )}
 		</div>
 
-			<div className='p-4'>
-				<button
-					type='click'
-					className='w-full mt-4 p-4 bg-red-500 hover:bg-red-700 text-white font-bold uppercase transition-colors truncate'
-				>
-					Cancelar Orden
-				</button>
-
-			</div>
+		<div className='p-4'>
+			<button
+				type='click'
+				className='w-full mt-4 p-4 bg-red-500 hover:bg-red-700 text-white font-bold uppercase transition-colors truncate'
+				onClick={logout}
+			>
+				Cancelar Orden
+			</button>
+			
+		</div>
 
 	</aside>
 )
