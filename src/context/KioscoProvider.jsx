@@ -20,8 +20,15 @@ const KioscoProvider = ({ children }) => {
     //obtener las categorias desde un API utilizando axios
     const getCategorias = async () => {
         //axiosClient definido en assets/config/axios.js
+        
+        const token = localStorage.getItem('AUTH_TOKEN');
+
         try {
-            const {data} = await axiosClient('/api/categorias')
+            const {data} = await axiosClient('/api/categorias', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
             setCategorias(data.data)
             setCategoriaActual(data.data[0])
         } catch (error) {
@@ -84,6 +91,7 @@ const KioscoProvider = ({ children }) => {
         const token = localStorage.getItem('AUTH_TOKEN');
 
         try {
+            //enviar datos hacia la API
             const {data} = await axiosClient.post('/api/pedidos', 
                 {
                     productos: pedido.map(producto => {
@@ -101,7 +109,7 @@ const KioscoProvider = ({ children }) => {
                 }
             );
             
-            //mostrar notificacion
+            //mostrar notificacion, el mensaje es recuperado desde la respuesta retornada por la API
             toast.success(data.message, {autoClose: 1500, theme: 'dark'});
             
             //vaciar el pedido y reset al total
@@ -114,11 +122,46 @@ const KioscoProvider = ({ children }) => {
             setTimeout(() => {
                 //eliminar el token y cerrar sesión
                 localStorage.removeItem('AUTH_TOKEN');
-                logout();
+                // logout();
             }, 3000);
 
         } catch (error) {
             console.log(error?.response?.data?.message)
+        }
+    }
+
+    /**
+     * COMPLETAR PEDIDO
+     */
+    const handleCompletarPedido = async (id) => {
+
+        //recuperar el token
+        const token = localStorage.getItem('AUTH_TOKEN');
+
+        //enviar peticion de actualizar un registro, buscara el metodo update
+        //utiliza el route model binding
+        try {
+            await axiosClient.put(`/api/pedidos/${id}`, null, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handleProductoAgotado = async (id) => {
+        const token = localStorage.getItem('AUTH_TOKEN');
+
+        try {
+            await axiosClient.put(`/api/productos/${id}`, null, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+        } catch (error) {
+            console.log(error)
         }
     }
 
@@ -153,7 +196,9 @@ const KioscoProvider = ({ children }) => {
                 handleEliminarProducto,
                 total,
                 pedidoIsEmpty,
-                handleFinalizarPedido
+                handleFinalizarPedido,
+                handleCompletarPedido,
+                handleProductoAgotado
             }}
         >{ children }</KioscoContext.Provider>
     );

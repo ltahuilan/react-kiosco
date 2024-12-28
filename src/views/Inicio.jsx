@@ -14,9 +14,15 @@ export default function Inicio() {
 	//consulta SWR
 	// const fetcher = (...args) => fetch(...args).then(res => res.json()) // https://swr.vercel.app/es-ES/docs/getting-started
 	
+	const token = localStorage.getItem('AUTH_TOKEN');
+
 	try {
 		
-		const fetcher = () => axiosClient('/api/productos')
+		const fetcher = () => axiosClient('/api/productos', {
+			headers: {
+				Authorization: `Bearer ${token}`
+			}
+		})
 			.then(response => response.data)
 			.catch(error => console.log(error))
 	
@@ -27,7 +33,7 @@ export default function Inicio() {
 		if(isLoading) {
 			return (
 				<Spinner
-					message={'Cargando productos...'}
+					message="Esperando al servidor..."
 				/>
 			)
 		}
@@ -46,6 +52,7 @@ export default function Inicio() {
 							//props
 							key={producto.imagen}
 							producto={producto}
+							botonAgregar={true}
 						/>
 					))}
 				</div>
